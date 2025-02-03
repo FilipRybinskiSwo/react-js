@@ -1,0 +1,41 @@
+name: Deploy React App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Generate Build Version
+        run: echo "REACT_APP_BUILD_VERSION=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+      - name: Build React App
+        run: |
+          npm install
+          npm run build
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: react-build
+          path: build
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: react-build
+          path: build
+
+      - name: Deploy to Azure
+        run: |
+          az webapp deployment source config-zip --resource-group react-app --name react-js-app --src build.zip
