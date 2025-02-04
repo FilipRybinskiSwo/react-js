@@ -1,11 +1,14 @@
-name: Deploy React App to Azure
+name: Self-hosted Deploy React App to Azure
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
 
