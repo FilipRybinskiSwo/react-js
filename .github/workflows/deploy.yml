@@ -26,7 +26,7 @@ jobs:
           npm run build
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip . -x "node_modules/*"
+        run: zip -r build.zip ./build
 
   deploy:
     runs-on: self-hosted
@@ -38,18 +38,12 @@ jobs:
       id-token: write 
       contents: read
 
-    steps:      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.__clientidsecretname__ }}
-          tenant-id: ${{ secrets.__tenantidsecretname__ }}
-          subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
-
-      - name: 'Deploy to Azure Web App'
+    steps:
+      - name: Deploy to Azure Web App using Publish Profile
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'webAppReact'
           slot-name: 'production'
-          package: release.zip
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: build.zip
